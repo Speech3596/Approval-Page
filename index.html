@@ -3,131 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>승인 요청</title>
+    <title>보고서 승인 요청 - Poly</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body { 
-            font-family: Arial, sans-serif; 
-            max-width: 800px; 
-            margin: 50px auto; 
-            padding: 20px; 
-            background-color: #f5f5f5;
-        }
-        .container { 
-            background: white;
-            border: 1px solid #ddd; 
-            padding: 30px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-        .info-box {
-            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+            min-height: 100vh;
             padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
         }
-        .button { 
-            padding: 15px 30px; 
-            margin: 10px; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-size: 16px; 
+        
+        .container { 
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e5799 0%, #2989d8 50%, #207cca 51%, #7db9e8 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
             font-weight: bold;
+            color: #1e5799;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        .approve { background-color: #28a745; color: white; }
-        .reject { background-color: #dc3545; color: white; }
-        .approve:hover { background-color: #218838; }
-        .reject:hover { background-color: #c82333; }
-        textarea { 
-            width: 100%; 
-            height: 100px; 
-            margin: 10px 0; 
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 300;
         }
-        .hidden { display: none; }
-        .error { color: red; font-weight: bold; }
-        .success { color: green; font-weight: bold; }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .info-section {
+            background: linear-gradient(135deg, #f8fffe 0%, #f0fff4 100%);
+            border: 2px solid #e8f5e8;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .info-section::before {
+            content: '📋';
+            position: absolute;
+            top: -15px;
+            left: 25px;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e8f5e8;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #2c5530;
+            font-size: 16px;
+        }
+        
+        .info-value {
+            color: #4a7c59;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .action-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-approve {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-reject {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.4);
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+            color: white;
+        }
+        
+        .reject-form {
+            background: #fff8f8;
+            border: 2px solid #ffebee;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .reject-form h3 {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .reject-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #ffcdd2;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+        
+        .reject-textarea:focus {
+            outline: none;
+            border-color: #f44336;
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.2);
+        }
+        
+        .result-section {
+            text-align: center;
+            padding: 60px 40px;
+            display: none;
+        }
+        
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .result-description {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .success {
+            color: #4CAF50;
+        }
+        
+        .error {
+            color: #f44336;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container fade-in">
+        <!-- 헤더 섹션 -->
         <div class="header">
-            <h1>📊 승인 요청</h1>
+            <div class="header-content">
+                <div class="logo">P</div>
+                <h1>보고서 승인 요청</h1>
+                <p>AI Tool 활용 분석 자동화 시스템</p>
+            </div>
         </div>
         
-        <!-- 토큰 검증 실패 시 표시 -->
+        <!-- 에러 메시지 -->
         <div id="errorMessage" class="hidden">
-            <h2 class="error">❌ 접근 권한이 없습니다</h2>
-            <p>유효하지 않은 승인 링크이거나 만료된 요청입니다.</p>
+            <div class="result-section">
+                <div class="result-icon">❌</div>
+                <h2 class="result-title error">접근 권한이 없습니다</h2>
+                <p class="result-description">유효하지 않은 승인 링크이거나 만료된 요청입니다.</p>
+            </div>
         </div>
         
-        <!-- 정상 승인 페이지 -->
-        <div id="approvalSection">
-            <div class="info-box">
-                <h3>📋 승인 요청 정보</h3>
-                <p><strong>요청 ID:</strong> <span id="requestId">-</span></p>
-                <p><strong>요청일:</strong> <span id="requestDate">-</span></p>
-                <p><strong>요청자:</strong> <span id="requester">시스템 관리자</span></p>
-                <p><strong>만료일:</strong> <span id="expiryDate">-</span></p>
+        <!-- 메인 컨텐츠 -->
+        <div id="mainContent" class="content">
+            <!-- 요청 정보 섹션 -->
+            <div class="info-section">
+                <div class="info-row">
+                    <span class="info-label">요청자</span>
+                    <span class="info-value" id="requesterName">시스템 관리자</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">요청 ID</span>
+                    <span class="info-value" id="requestId">REQ-240609</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">요청일</span>
+                    <span class="info-value" id="requestDate">2025년 6월 9일</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">만료일</span>
+                    <span class="info-value" id="expiryDate">2025년 6월 16일</span>
+                </div>
             </div>
             
-            <div style="text-align: center; margin: 30px 0;">
-                <button class="button approve" onclick="handleApproval('approve')">
-                    ✅ 승인하기
-                </button>
-                <button class="button reject" onclick="showRejectForm()">
-                    ❌ 반려하기
-                </button>
-            </div>
-            
-            <!-- 반려 사유 입력 폼 -->
-            <div id="rejectForm" class="hidden">
-                <h3>반려 사유를 입력해주세요:</h3>
-                <textarea id="rejectReason" placeholder="반려 사유를 구체적으로 입력해주세요..."></textarea>
-                <div style="text-align: center;">
-                    <button class="button reject" onclick="handleApproval('reject')">
-                        반려 확정
+            <!-- 액션 버튼 섹션 -->
+            <div class="action-section">
+                <div class="button-group">
+                    <button class="btn btn-approve" onclick="handleApproval('approve')">
+                        ✅ 승인하기
                     </button>
-                    <button class="button" onclick="hideRejectForm()" style="background: #6c757d; color: white;">
-                        취소
+                    <button class="btn btn-reject" onclick="showRejectForm()">
+                        ❌ 반려하기
                     </button>
+                </div>
+                
+                <!-- 반려 사유 입력 폼 -->
+                <div id="rejectForm" class="reject-form">
+                    <h3>반려 사유를 입력해주세요</h3>
+                    <textarea 
+                        id="rejectReason" 
+                        class="reject-textarea"
+                        placeholder="반려 사유를 구체적으로 입력해주세요...&#10;예: 데이터 검증 필요, 추가 분석 요청 등"
+                    ></textarea>
+                    <div class="button-group">
+                        <button class="btn btn-reject" onclick="handleApproval('reject')">
+                            반려 확정
+                        </button>
+                        <button class="btn btn-cancel" onclick="hideRejectForm()">
+                            취소
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- 처리 완료 메시지 -->
+        <!-- 결과 메시지 -->
         <div id="resultMessage" class="hidden">
-            <div style="text-align: center; padding: 40px;">
-                <h2 id="resultTitle"></h2>
-                <p id="resultDescription"></p>
+            <div class="result-section">
+                <div class="result-icon" id="resultIcon"></div>
+                <h2 class="result-title" id="resultTitle"></h2>
+                <p class="result-description" id="resultDescription"></p>
             </div>
         </div>
     </div>
 
     <script>
-        // URL에서 파라미터 추출
+        // URL 파라미터 추출
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         const requestId = urlParams.get('id');
+        const requester = urlParams.get('requester') || '시스템 관리자';
         
-        // 페이지 로드 시 초기화
+        // 페이지 초기화
         window.onload = function() {
             if (!token || !requestId) {
                 showError();
                 return;
             }
             
-            // 간단한 토큰 검증 및 정보 표시
-            validateAndShowInfo();
+            loadApprovalData();
         };
         
-        function validateAndShowInfo() {
-            //
+        function loadApprovalData() {
+            // 요청자 정보 표시 (URL 파라미터에서 가져오거나 기본값)
+            document.getElementById('requesterName').textContent = decodeURIComponent(requester);
+            
+            // 요청 ID 표시
+            document.getElementById('requestId').textContent = requestId;
+            
+            // 현재 날짜 기준으로 요청일/만료일 설정
+            const now = new Date();
+            const expiryDate = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('requestDate').textContent = now.toLocaleDateString('ko-KR');
+            document.getElementById('expiryDate').textContent = expiryDate.toLocaleDateString('ko-KR');
+        }
+        
+        function showError() {
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+        
+        function showRejectForm() {
+            document.getElementById('rejectForm').style.display = 'block';
+            document.getElementById('rejectReason').focus();
+        }
+        
+        function hideRejectForm() {
+            document.getElementById('rejectForm').style.display = 'none';
+            document.getElementById('rejectReason').value = '';
+        }
+        
+        function handleApproval(action) {
+            const reason = action === 'reject' ? document.getElementById('rejectReason').value.trim() : '';
+            
+            if (action === 'reject' && !reason) {
+                alert('반려 사유를 입력해주세요.');
+                return;
+            }
+            
+            // n8n 웹훅으로 전송할 데이터
+            const data = {
+                token: token,
+                requestId: requestId,
+                requester: requester,
+                action: action,
+                reason: reason,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('승인/반려 데이터:', data);
+            
+            // 결과 표시
+            showResult(action, true);
+            
+            // 실제 n8n 웹훅 전송 (주석 해제해서 사용)
+            /*
+            fetch('https://your-n8n-webhook-url.com/webhook/approval', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                showResult(action, true);
+            })
+            .catch(error => {
+                showResult(action, false);
+            });
+            */
+        }
+        
+        function showResult(action, success) {
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('resultMessage').classList.remove('hidden');
+            
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const description = document.getElementById('resultDescription');
+            
+            if (success) {
+                if (action === 'approve') {
+                    icon.textContent = '✅';
+                    title.textContent = '승인이 완료되었습니다';
+                    title.className = 'result-title success';
+                    description.textContent = '보고서가 승인되어 배포를 진행합니다. 완료 시 이메일로 알려드리겠습니다.';
+                } else {
+                    icon.textContent = '❌';
+                    title.textContent = '반려가 완료되었습니다';
+                    title.className = 'result-title error';
+                    description.textContent = '반려 사유가 작성자에게 전달되었습니다. 수정 후 재승인 요청이 가능합니다.';
+                }
+            } else {
+                icon.textContent = '⚠️';
+                title.textContent = '처리 중 오류가 발생했습니다';
+                title.className = 'result-title error';
+                description.textContent = '잠시 후 다시 시도해주세요.';
+            }
+        }
+    </script>
+</body>
+</html>
