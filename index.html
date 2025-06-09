@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>승인 요청 시스템</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container { 
+            background: white;
+            border: 1px solid #ddd; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .button { 
+            padding: 15px 30px; 
+            margin: 10px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+        }
+        .approve { background-color: #28a745; color: white; }
+        .reject { background-color: #dc3545; color: white; }
+        .approve:hover { background-color: #218838; }
+        .reject:hover { background-color: #c82333; }
+        textarea { 
+            width: 100%; 
+            height: 100px; 
+            margin: 10px 0; 
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .hidden { display: none; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 학생수 보고서 승인 시스템</h1>
+        </div>
+        
+        <!-- 토큰 검증 실패 시 표시 -->
+        <div id="errorMessage" class="hidden">
+            <h2 class="error">❌ 접근 권한이 없습니다</h2>
+            <p>유효하지 않은 승인 링크이거나 만료된 요청입니다.</p>
+        </div>
+        
+        <!-- 정상 승인 페이지 -->
+        <div id="approvalSection">
+            <div class="info-box">
+                <h3>📋 승인 요청 정보</h3>
+                <p><strong>요청 ID:</strong> <span id="requestId">로딩 중...</span></p>
+                <p><strong>요청일:</strong> <span id="requestDate">로딩 중...</span></p>
+                <p><strong>보고서:</strong> <span id="reportTitle">월간 학생수 분석 보고서</span></p>
+                <p><strong>만료일:</strong> <span id="expiryDate">로딩 중...</span></p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="button approve" onclick="handleApproval('approve')">
+                    ✅ 승인하기
+                </button>
+                <button class="button reject" onclick="showRejectForm()">
+                    ❌ 반려하기
+                </button>
+            </div>
+            
+            <!-- 반려 사유 입력 폼 -->
+            <div id="rejectForm" class="hidden">
+                <h3>반려 사유를 입력해주세요:</h3>
+                <textarea id="rejectReason" placeholder="반려 사유를 구체적으로 입력해주세요..."></textarea>
+                <div style="text-align: center;">
+                    <button class="button reject" onclick="handleApproval('reject')">
+                        반려 확정
+                    </button>
+                    <button class="button" onclick="hideRejectForm()" style="background: #6c757d; color: white;">
+                        취소
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 처리 완료 메시지 -->
+        <div id="resultMessage" class="hidden">
+            <div style="text-align: center; padding: 40px;">
+                <h2 id="resultTitle"></h2>
+                <p id="resultDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL에서 토큰과 정보 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const requestId = urlParams.get('id');
+        
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            if (!token || !requestId) {
+                showError();
+                return;
+            }
+            
+            // 토큰 검증 및 정보 표시
+            validateAndShowInfo();
+        };
+        
+        function validateAndShowInfo() {
+            try {
+                // 토큰에서 정보 추출 (Base64 디코딩)
+                const tokenData = atob(token);
+                const [timestamp, reportId] = tokenData.split('_');
+                
+                // 만료 시간 체크 (7일)
+                const requestTime = parseInt(timestamp);
+                const expiryTime = requestTime + (7 * 24 * 60 * 60 * 1000);
+                const now = Date.now();
+                
+                if (now > expiryTime) {
+                    showError('승인 기간이 만료되었습니다.');
+                    return;
+                }
+                
+                // 정보 표시
+                document.getElementById('requestId').textContent = requestId;
+                document.getElementById('requestDate').textContent = new Date(requestTime).toLocaleDateString('ko-KR');
+                document.getElementById('expiryDate').textContent = new Date(expiryTime).toLocaleDateString('ko-KR');
+                
+            } catch (error) {
+                showError('유효하지 않은 토큰입니다.');
+            }
+        }
+        
+        function showError(message = '접근 권한이 없습니다.') {
+            document.getElementById('approvalSection').classList.add('hidden');
+            document.getElementById('errorMessage').classList.remove('hidden');
+            if (message !== '접근 권한이 없습니다.') {
+                document.querySelector('#errorMessage p').textContent = message;
+            }
+        }
+        
+        function showRejectForm() {
+            document.getElementById('rejectForm').classList.remove('hidden');
+        }
+        
+        function hideRejectForm() {
+            document.getElementById('rejectForm').classList.add('hidden');
+            document.getElementById('rejectReason').value = '';
+        }
+        
+        function handleApproval(action) {
+            const reason = action === 'reject' ? document.getElementById('rejectReason').value : '';
+            
+            if (action === 'reject' && !reason.trim()) {
+                alert('반려 사유를 입력해주세요.');
+                return;
+            }
+            
+            // n8n 웹훅으로 전송할 데이터
+            const data = {
+                token: token,
+                requestId: requestId,
+                action: action,
+                reason: reason,
+                timestamp: new Date().toISOString()
+            };
+            
+            // 실제 n8n 웹훅 URL (나중에 설정)
+            const webhookUrl = 'https://your-n8n-webhook-url.com/webhook/approval';
+            
+            // 웹훅으로 데이터 전송
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                showResult(action, true);
+            })
+            .
