@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>승인 요청 시스템</title>
+    <title>승인 요청</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -60,7 +60,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 학생수 보고서 승인 시스템</h1>
+            <h1>📊 승인 요청</h1>
         </div>
         
         <!-- 토큰 검증 실패 시 표시 -->
@@ -73,10 +73,10 @@
         <div id="approvalSection">
             <div class="info-box">
                 <h3>📋 승인 요청 정보</h3>
-                <p><strong>요청 ID:</strong> <span id="requestId">로딩 중...</span></p>
-                <p><strong>요청일:</strong> <span id="requestDate">로딩 중...</span></p>
-                <p><strong>보고서:</strong> <span id="reportTitle">월간 학생수 분석 보고서</span></p>
-                <p><strong>만료일:</strong> <span id="expiryDate">로딩 중...</span></p>
+                <p><strong>요청 ID:</strong> <span id="requestId">-</span></p>
+                <p><strong>요청일:</strong> <span id="requestDate">-</span></p>
+                <p><strong>요청자:</strong> <span id="requester">시스템 관리자</span></p>
+                <p><strong>만료일:</strong> <span id="expiryDate">-</span></p>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
@@ -113,7 +113,7 @@
     </div>
 
     <script>
-        // URL에서 토큰과 정보 추출
+        // URL에서 파라미터 추출
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         const requestId = urlParams.get('id');
@@ -125,83 +125,9 @@
                 return;
             }
             
-            // 토큰 검증 및 정보 표시
+            // 간단한 토큰 검증 및 정보 표시
             validateAndShowInfo();
         };
         
         function validateAndShowInfo() {
-            try {
-                // 토큰에서 정보 추출 (Base64 디코딩)
-                const tokenData = atob(token);
-                const [timestamp, reportId] = tokenData.split('_');
-                
-                // 만료 시간 체크 (7일)
-                const requestTime = parseInt(timestamp);
-                const expiryTime = requestTime + (7 * 24 * 60 * 60 * 1000);
-                const now = Date.now();
-                
-                if (now > expiryTime) {
-                    showError('승인 기간이 만료되었습니다.');
-                    return;
-                }
-                
-                // 정보 표시
-                document.getElementById('requestId').textContent = requestId;
-                document.getElementById('requestDate').textContent = new Date(requestTime).toLocaleDateString('ko-KR');
-                document.getElementById('expiryDate').textContent = new Date(expiryTime).toLocaleDateString('ko-KR');
-                
-            } catch (error) {
-                showError('유효하지 않은 토큰입니다.');
-            }
-        }
-        
-        function showError(message = '접근 권한이 없습니다.') {
-            document.getElementById('approvalSection').classList.add('hidden');
-            document.getElementById('errorMessage').classList.remove('hidden');
-            if (message !== '접근 권한이 없습니다.') {
-                document.querySelector('#errorMessage p').textContent = message;
-            }
-        }
-        
-        function showRejectForm() {
-            document.getElementById('rejectForm').classList.remove('hidden');
-        }
-        
-        function hideRejectForm() {
-            document.getElementById('rejectForm').classList.add('hidden');
-            document.getElementById('rejectReason').value = '';
-        }
-        
-        function handleApproval(action) {
-            const reason = action === 'reject' ? document.getElementById('rejectReason').value : '';
-            
-            if (action === 'reject' && !reason.trim()) {
-                alert('반려 사유를 입력해주세요.');
-                return;
-            }
-            
-            // n8n 웹훅으로 전송할 데이터
-            const data = {
-                token: token,
-                requestId: requestId,
-                action: action,
-                reason: reason,
-                timestamp: new Date().toISOString()
-            };
-            
-            // 실제 n8n 웹훅 URL (나중에 설정)
-            const webhookUrl = 'https://your-n8n-webhook-url.com/webhook/approval';
-            
-            // 웹훅으로 데이터 전송
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                showResult(action, true);
-            })
-            .
+            //
