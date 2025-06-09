@@ -306,11 +306,11 @@
             <div class="info-section">
                 <div class="info-row">
                     <span class="info-label">요청자</span>
-                    <span class="info-value" id="requesterName">시스템 관리자</span>
+                    <span class="info-value" id="requesterName">이소민</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">요청 ID</span>
-                    <span class="info-value" id="requestId">REQ-240609</span>
+                    <span class="info-value" id="requestId">자동생성</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">요청일</span>
@@ -368,19 +368,37 @@
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         const requestId = urlParams.get('id');
-        const requester = urlParams.get('requester') || '시스템 관리자';
+        const requester = urlParams.get('requester');
+        const senderEmail = urlParams.get('sender');
         
-        // 페이지 초기화 - 토큰 검증 없이 바로 표시
+        // 페이지 초기화
         window.onload = function() {
             loadApprovalData();
         };
         
         function loadApprovalData() {
-            // 요청자 정보 표시 (URL 파라미터에서 가져오거나 기본값)
-            document.getElementById('requesterName').textContent = decodeURIComponent(requester);
+            // 요청자 정보 표시 (URL 파라미터 또는 기본값)
+            if (requester) {
+                document.getElementById('requesterName').textContent = decodeURIComponent(requester);
+            } else if (senderEmail) {
+                // 이메일에서 이름 추출 (예: somin.lee@poly.com → 이소민)
+                const emailName = decodeURIComponent(senderEmail).split('@')[0];
+                document.getElementById('requesterName').textContent = emailName;
+            }
             
-            // 요청 ID 표시
-            document.getElementById('requestId').textContent = requestId || 'REQ-' + Date.now().toString().slice(-6);
+            // 동적 요청 ID 생성
+            if (requestId) {
+                document.getElementById('requestId').textContent = requestId;
+            } else {
+                // 현재 시간 기반 고유 ID 생성
+                const now = new Date();
+                const uniqueId = 'REQ-' + now.getFullYear().toString().slice(-2) + 
+                                String(now.getMonth() + 1).padStart(2, '0') + 
+                                String(now.getDate()).padStart(2, '0') + '-' +
+                                String(now.getHours()).padStart(2, '0') + 
+                                String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('requestId').textContent = uniqueId;
+            }
             
             // 현재 날짜 기준으로 요청일/만료일 설정
             const now = new Date();
@@ -416,8 +434,9 @@
             // n8n 웹훅으로 전송할 데이터
             const data = {
                 token: token,
-                requestId: requestId,
-                requester: requester,
+                requestId: document.getElementById('requestId').textContent,
+                requester: document.getElementById('requesterName').textContent,
+                senderEmail: senderEmail,
                 action: action,
                 reason: reason,
                 timestamp: new Date().toISOString()
